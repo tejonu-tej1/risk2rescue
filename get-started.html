@@ -1,0 +1,1699 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How It Works & Platform Architecture | Risk2Rescue</title>
+  <meta name="description"
+    content="Discover how Risk2Rescue converts raw multi-hazard live feeds into AI-scored Red Zones and actionable relocation guidance for disaster response authorities.">
+
+  <!-- Favicon -->
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+
+  <!-- Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+
+  <!-- Core Design System -->
+  <link rel="stylesheet" href="css/base.css">
+
+  <!-- Sign In Floating Modal Styles -->
+  <link rel="stylesheet" href="css/signin-modal.css">
+
+  <style>
+    /* ================================================================
+       RISK2RESCUE — GET STARTED / HOW IT WORKS
+       Uses css/base.css tokens as single source of truth
+       ================================================================ */
+    :root {
+      --font-display: var(--font-heading, 'Times New Roman', Times, serif);
+      --font-body: var(--font-base, 'Inter', -apple-system, BlinkMacSystemFont, sans-serif);
+      --radius-pill: 9999px;
+      --transition-smooth: 280ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      background-color: var(--bg-base);
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      overflow-y: auto !important;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      position: relative;
+    }
+
+    /* Ambient fixed atmospheric layer */
+    .bg-backdrop-layer {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background-image: url('assets/coastal-hero.jpg');
+      background-size: cover;
+      background-position: center;
+      opacity: 0.12;
+      filter: saturate(0.7) contrast(1.15);
+      pointer-events: none;
+    }
+
+    .bg-gradient-mesh {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background:
+        radial-gradient(circle at 50% 8%, rgba(37, 99, 235, 0.08) 0%, transparent 60%),
+        radial-gradient(circle at 85% 65%, rgba(220, 38, 38, 0.05) 0%, transparent 50%),
+        linear-gradient(180deg, var(--bg-base, #f8fafc) 0%, var(--bg-elevated, #f1f5f9) 40%, var(--bg-base, #f8fafc) 100%);
+      pointer-events: none;
+    }
+
+    /* ================= 1. FLOATING PILL NAVBAR ================= */
+    .floating-nav-wrapper {
+      position: fixed;
+      top: 24px;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      display: flex;
+      justify-content: center;
+      padding: 0 16px;
+      pointer-events: none;
+    }
+
+    .pill-navbar {
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      width: 100%;
+      max-width: 760px;
+      padding: 8px 10px 8px 18px;
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-pill);
+      box-shadow: 0 12px 36px rgba(15, 23, 42, 0.12);
+      transition: all var(--transition-smooth);
+    }
+
+    .pill-navbar:hover {
+      border-color: var(--glass-border-bright);
+      background: var(--glass-bg-hover);
+      box-shadow: 0 16px 42px rgba(15, 23, 42, 0.16), 0 0 20px rgba(29, 78, 216, 0.12);
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-primary);
+      user-select: none;
+    }
+
+    .nav-logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 12px rgba(220, 38, 38, 0.25);
+      flex-shrink: 0;
+    }
+
+    .nav-logo-icon svg {
+      width: 17px;
+      height: 17px;
+      fill: none;
+      stroke: #dc2626;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .nav-brand-title {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-primary);
+    }
+
+    .nav-brand-title .red-text {
+      color: #dc2626;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-link {
+      font-family: var(--font-body);
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      transition: all 0.2s ease;
+    }
+
+    .nav-link:hover {
+      color: var(--accent-blue);
+      background: rgba(29, 78, 216, 0.08);
+    }
+
+    .nav-signin-btn {
+      font-family: var(--font-body);
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #ffffff;
+      background: var(--accent-blue);
+      border: none;
+      outline: none;
+      padding: 7px 18px;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(29, 78, 216, 0.35);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .nav-signin-btn:hover {
+      background: #1e40af;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(29, 78, 216, 0.45);
+    }
+
+    .nav-signin-btn:active {
+      transform: translateY(0) scale(0.97);
+    }
+
+    /* ================= 2. PAGE CONTAINER ================= */
+    .page-wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 130px 24px 80px;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* ================= 3. HERO STRIP ================= */
+    .hero-strip {
+      text-align: center;
+      margin-bottom: 70px;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 14px;
+      border-radius: var(--radius-pill);
+      background: #dbeafe;
+      border: 1px solid #bfdbfe;
+      color: #1d4ed8;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+      backdrop-filter: blur(8px);
+    }
+
+    .hero-eyebrow .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #1d4ed8;
+      box-shadow: 0 0 8px rgba(29, 78, 216, 0.4);
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      line-height: 1.15;
+      color: var(--text-primary);
+      margin-bottom: 18px;
+    }
+
+    .hero-title .red-accent {
+      color: #dc2626;
+    }
+
+    .hero-subhead {
+      font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+      color: var(--text-secondary);
+      max-width: 680px;
+      margin: 0 auto;
+      line-height: 1.55;
+    }
+
+    /* ================= 4. HOW IT WORKS PIPELINE ================= */
+    .section-block {
+      margin-bottom: 90px;
+    }
+
+    .section-header-compact {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .section-tag {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent-blue);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 3.2vw, 2.4rem);
+      font-weight: 800;
+      letter-spacing: normal;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+
+    .section-desc {
+      font-size: 15px;
+      color: var(--text-secondary);
+      max-width: 620px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    /* Pipeline Horizontal Timeline (Desktop) */
+    .pipeline-timeline {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    /* Connecting Track Line behind steps */
+    .pipeline-timeline::before {
+      content: '';
+      position: absolute;
+      top: 48px;
+      left: 10%;
+      right: 10%;
+      height: 2px;
+      background: linear-gradient(90deg,
+          rgba(29, 78, 216, 0.3) 0%,
+          rgba(220, 38, 38, 0.4) 40%,
+          rgba(202, 138, 4, 0.4) 75%,
+          rgba(22, 163, 74, 0.5) 100%);
+      z-index: 1;
+    }
+
+    .pipeline-step-card {
+      position: relative;
+      z-index: 2;
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 28px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: all var(--transition-smooth);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .pipeline-step-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--accent-blue);
+      background: var(--glass-bg-hover);
+      box-shadow: var(--shadow-md);
+    }
+
+    .step-node-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .step-icon-badge {
+      width: 58px;
+      height: 58px;
+      border-radius: 16px;
+      background: #ffffff;
+      border: 1px solid var(--glass-border-bright, rgba(15, 23, 42, 0.12));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      transition: transform 0.2s ease;
+    }
+
+    .pipeline-step-card:hover .step-icon-badge {
+      transform: scale(1.08);
+    }
+
+    .step-badge-number {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: var(--accent-blue);
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: var(--radius-pill);
+      box-shadow: 0 2px 6px rgba(29, 78, 216, 0.4);
+    }
+
+    .step-number-text {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .step-title {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+
+    .step-description {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    /* Distinct step themes (Luminous Badges) */
+    .step-1 .step-icon-badge {
+      background: rgba(37, 99, 235, 0.15);
+      border-color: rgba(59, 130, 246, 0.3);
+      color: #60a5fa;
+    }
+
+    .step-2 .step-icon-badge {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #f87171;
+    }
+
+    .step-3 .step-icon-badge {
+      background: rgba(234, 179, 8, 0.15);
+      border-color: rgba(234, 179, 8, 0.3);
+      color: #facc15;
+    }
+
+    .step-4 .step-icon-badge {
+      background: rgba(34, 197, 94, 0.15);
+      border-color: rgba(34, 197, 94, 0.3);
+      color: #4ade80;
+    }
+
+    /* ================= 5. FEATURES GRID ================= */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+      margin-top: 32px;
+    }
+
+    .feature-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      padding: 26px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: all var(--transition-smooth);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .feature-card:hover {
+      background: var(--glass-bg-hover);
+      border-color: var(--accent-blue);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .feature-icon-box {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    /* Luminous icon badges for features */
+    .f-icon-red {
+      background: rgba(239, 68, 68, 0.14);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.28);
+    }
+
+    .f-icon-blue {
+      background: rgba(59, 130, 246, 0.14);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.28);
+    }
+
+    .f-icon-amber {
+      background: rgba(234, 179, 8, 0.14);
+      color: #facc15;
+      border: 1px solid rgba(234, 179, 8, 0.28);
+    }
+
+    .f-icon-emerald {
+      background: rgba(34, 197, 94, 0.14);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.28);
+    }
+
+    .f-icon-cyan {
+      background: rgba(6, 182, 212, 0.14);
+      color: #38bdf8;
+      border: 1px solid rgba(6, 182, 212, 0.28);
+    }
+
+    .f-icon-purple {
+      background: rgba(168, 85, 247, 0.14);
+      color: #c084fc;
+      border: 1px solid rgba(168, 85, 247, 0.28);
+    }
+
+    .feature-title {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.35;
+    }
+
+    .feature-desc {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    /* ================= 6. WHO IT'S FOR (PERSONA SPLIT) ================= */
+    .persona-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 28px;
+      margin-top: 32px;
+    }
+
+    .persona-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 38px 32px 38px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      transition: all var(--transition-smooth);
+    }
+
+    .persona-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+    }
+
+    .persona-citizen::before {
+      background: linear-gradient(90deg, #16a34a, #15803d);
+    }
+
+    .persona-authority::before {
+      background: linear-gradient(90deg, #1d4ed8, #2563eb);
+    }
+
+    .persona-card:hover {
+      transform: translateY(-4px);
+      background: var(--glass-bg-hover);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .persona-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .persona-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      flex-shrink: 0;
+    }
+
+    .avatar-citizen {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #4ade80;
+    }
+
+    .avatar-authority {
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      color: #60a5fa;
+    }
+
+    .persona-meta h3 {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .persona-tagline {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .persona-checklist {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 0;
+    }
+
+    .persona-checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    .persona-checklist svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .persona-citizen svg {
+      color: #22c55e;
+    }
+
+    .persona-authority svg {
+      color: #3b82f6;
+    }
+
+    .persona-entry-hint-wrapper {
+      text-align: center;
+      margin-top: 28px;
+    }
+
+    .persona-entry-hint {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 24px;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-pill);
+      font-size: 13.5px;
+      line-height: 1.45;
+      text-align: center;
+      max-width: 100%;
+      color: var(--text-secondary);
+      backdrop-filter: var(--glass-blur-sm);
+      -webkit-backdrop-filter: var(--glass-blur-sm);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.2);
+    }
+
+    .persona-entry-hint svg {
+      width: 16px;
+      height: 16px;
+      color: var(--accent-cyan);
+      flex-shrink: 0;
+    }
+
+    .persona-entry-hint strong {
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .persona-cta-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 13px 24px;
+      border-radius: var(--radius-pill);
+      font-family: var(--font-body);
+      font-size: 14.5px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-citizen {
+      background: linear-gradient(135deg, #16a34a, #15803d);
+      color: #ffffff;
+      box-shadow: 0 4px 18px rgba(22, 163, 74, 0.35);
+    }
+
+    .btn-citizen:hover {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(22, 163, 74, 0.45);
+    }
+
+    .btn-authority {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #ffffff;
+      box-shadow: 0 4px 18px rgba(37, 99, 235, 0.35);
+    }
+
+    .btn-authority:hover {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(37, 99, 235, 0.45);
+    }
+
+    /* ================= 7. DATA SOURCES SECTION ================= */
+    .data-sources-container {
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      box-shadow: var(--shadow-md);
+      overflow-x: auto;
+    }
+
+    .sources-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .sources-table th {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .sources-table td {
+      padding: 16px;
+      border-bottom: 1px solid var(--glass-border);
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      vertical-align: middle;
+    }
+
+    .sources-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .sources-table tr:hover td {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-primary);
+    }
+
+    .source-org {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .source-bullet {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .source-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .badge-live {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .badge-official {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    /* ================= 8. SITE FOOTER ================= */
+    .site-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 32px;
+      border-top: 1px solid var(--glass-border);
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 40px;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .footer-brand strong {
+      color: #ef4444;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+    }
+
+    .footer-anchor {
+      color: var(--text-muted);
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .footer-anchor:hover {
+      color: #cbd5e1;
+    }
+
+    /* Toast shelf container */
+    #toast-shelf {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+
+    /* ================= 10. ACCESSIBILITY & RESPONSIVENESS ================= */
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+
+      .pipeline-step-card:hover,
+      .feature-card:hover,
+      .persona-card:hover {
+        transform: none !important;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .pipeline-timeline {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+      }
+
+      .pipeline-timeline::before {
+        display: none;
+      }
+
+      .features-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .persona-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .floating-nav-wrapper {
+        top: 14px;
+      }
+
+      .pill-navbar {
+        padding: 6px 8px 6px 14px;
+        gap: 12px;
+      }
+
+      .nav-brand-title {
+        font-size: 13.5px;
+      }
+
+      .page-wrapper {
+        padding: 100px 16px 60px;
+      }
+
+      .pipeline-timeline {
+        grid-template-columns: 1fr;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .site-footer {
+        flex-direction: column;
+        gap: 16px;
+        text-align: center;
+        padding: 24px 16px;
+      }
+
+      .footer-links {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Ambient Fixed Layers (No video, subtle coastal backdrop + gradient mesh) -->
+  <div class="bg-backdrop-layer" aria-hidden="true"></div>
+  <div class="bg-gradient-mesh" aria-hidden="true"></div>
+
+  <!-- ================= 1. REUSED PILL-SHAPED FLOATING NAVBAR ================= -->
+  <header class="floating-nav-wrapper">
+    <nav class="pill-navbar" aria-label="Main Navigation">
+      <!-- App Logo / Icon -->
+      <a href="index.html" class="nav-brand" title="Return to Home">
+        <div class="nav-logo-icon">
+          <img src="assets/logo.png" alt="Risk2Rescue Logo" style="width: 22px; height: 22px; object-fit: contain;">
+        </div>
+        <span class="nav-brand-title">
+          <span class="red-text">Risk2</span>Rescue
+        </span>
+      </a>
+
+      <!-- Nav Links: Home/About Us and Sign In Button -->
+      <div class="nav-actions">
+        <a href="index.html" class="nav-link" title="Return to Landing Page">Home</a>
+        <a href="#how-it-works" class="nav-link">Pipeline</a>
+        <a href="#features" class="nav-link">Features</a>
+        <button type="button" class="nav-signin-btn" id="nav-signin-btn" onclick="openSignInModal()">
+          Sign In
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ================= MAIN SCROLL CONTAINER ================= -->
+  <main class="page-wrapper">
+
+    <!-- ================= 2. HERO STRIP ================= -->
+    <header class="hero-strip">
+      <div class="hero-eyebrow">
+        <span class="dot"></span>
+        <span>End-to-End Decision Architecture</span>
+      </div>
+      <h1 class="hero-title">
+        How <span class="red-accent">Risk2</span>Rescue Works
+      </h1>
+      <p class="hero-subhead">
+        From raw hazard data to relocation decisions — here's the pipeline.
+      </p>
+    </header>
+
+    <!-- ================= 3. HOW IT WORKS — NUMBERED PIPELINE ================= -->
+    <section class="section-block" id="how-it-works" aria-labelledby="pipeline-heading">
+      <div class="section-header-compact">
+        <span class="section-tag">Continuous Operational Pipeline</span>
+        <h2 class="section-title" id="pipeline-heading">The 4-Stage Intelligence Engine</h2>
+        <p class="section-desc">
+          Automated ingestion, AI polygon classification, vulnerability carrying capacity analysis, and authoritative
+          relocation guidance.
+        </p>
+      </div>
+
+      <div class="pipeline-timeline">
+        <!-- Step 1 -->
+        <article class="pipeline-step-card step-1">
+          <div class="step-node-header">
+            <div class="step-icon-badge">
+              <span>📡</span>
+              <span class="step-badge-number">01</span>
+            </div>
+            <span class="step-number-text">Stage 01</span>
+          </div>
+          <h3 class="step-title">Ingest Live Hazard Data</h3>
+          <p class="step-description">
+            Pulls from USGS, IMD, Open-Meteo, and seismic/weather feeds in real time to capture active environmental
+            threats.
+          </p>
+        </article>
+
+        <!-- Step 2 -->
+        <article class="pipeline-step-card step-2">
+          <div class="step-node-header">
+            <div class="step-icon-badge">
+              <span>🧠</span>
+              <span class="step-badge-number">02</span>
+            </div>
+            <span class="step-number-text">Stage 02</span>
+          </div>
+          <h3 class="step-title">AI Red Zone Detection</h3>
+          <p class="step-description">
+            The AI engine classifies hazard polygons into Red/Orange/Yellow/Green tiers based on live intensity and
+            historical disaster data.
+          </p>
+        </article>
+
+        <!-- Step 3 -->
+        <article class="pipeline-step-card step-3">
+          <div class="step-node-header">
+            <div class="step-icon-badge">
+              <span>⚖️</span>
+              <span class="step-badge-number">03</span>
+            </div>
+            <span class="step-number-text">Stage 03</span>
+          </div>
+          <h3 class="step-title">Vulnerability & Capacity Scoring</h3>
+          <p class="step-description">
+            Computes a Vulnerability Priority Index per habitation and checks safe-site capacity against at-risk
+            population.
+          </p>
+        </article>
+
+        <!-- Step 4 -->
+        <article class="pipeline-step-card step-4">
+          <div class="step-node-header">
+            <div class="step-icon-badge">
+              <span>🚨</span>
+              <span class="step-badge-number">04</span>
+            </div>
+            <span class="step-number-text">Stage 04</span>
+          </div>
+          <h3 class="step-title">Actionable Relocation Guidance</h3>
+          <p class="step-description">
+            Ranks habitations for immediate/short-term/medium-term relocation and surfaces it to SDMA/NDRF authorities.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ================= 4. FEATURES GRID ================= -->
+    <section class="section-block" id="features" aria-labelledby="features-heading">
+      <div class="section-header-compact">
+        <span class="section-tag">Full-Stack Capabilities</span>
+        <h2 class="section-title" id="features-heading">Platform Features</h2>
+        <p class="section-desc">
+          Engineered for mission-critical disaster resilience, field evacuation coordination, and automated triage.
+        </p>
+      </div>
+
+      <div class="features-grid">
+        <!-- Feature 1 -->
+        <div class="feature-card">
+          <div class="feature-icon-box f-icon-red">🗺️</div>
+          <h3 class="feature-title">Live Multi-Hazard Red Zone Mapping</h3>
+          <p class="feature-desc">Dynamic geospatial polygon rendering for cyclone paths, coastal storm surges, river
+            flooding, and seismic hazard zones.</p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="feature-card">
+          <div class="feature-icon-box f-icon-emerald">⛺</div>
+          <h3 class="feature-title">Carrying Capacity Assessment</h3>
+          <p class="feature-desc">Calculates safe-zone absorption thresholds to prevent emergency relief camp
+            overcrowding during mass evacuations.</p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="feature-card">
+          <div class="feature-icon-box f-icon-amber">📊</div>
+          <h3 class="feature-title">AI Vulnerability Priority Index</h3>
+          <p class="feature-desc">Multi-criteria scoring model weighing infrastructure fragility, elevation, elderly
+            demographics, and hazard proximity.</p>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="feature-card">
+          <div class="feature-icon-box f-icon-red">🆘</div>
+          <h3 class="feature-title">Citizen SOS Beacon</h3>
+          <p class="feature-desc">One-touch offline-capable emergency beacon transmitting precise GPS telemetry and
+            family triage requirements.</p>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="feature-card">
+          <div class="feature-icon-box f-icon-cyan">🌩️</div>
+          <h3 class="feature-title">Real-Time Weather/Seismic Feeds</h3>
+          <p class="feature-desc">Direct live streams from USGS GeoJSON, IMD CAP alerts, and Open-Meteo microclimate
+            telemetry updated continuously.</p>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="feature-card">
+          <div class="feature-icon-box f-icon-blue">🏛️</div>
+          <h3 class="feature-title">Authority Command Center & Simulator</h3>
+          <p class="feature-desc">Interactive incident command cockpit featuring what-if disaster simulation scenarios
+            and automated resource allocation.</p>
+        </div>
+
+        <!-- Feature 7 -->
+        <div class="feature-card">
+          <div class="feature-icon-box f-icon-purple">📋</div>
+          <h3 class="feature-title">Citizen Report Queue</h3>
+          <p class="feature-desc">Live crowdsourced damage, waterlogging, and road obstruction reports validated with
+            automated geofencing.</p>
+        </div>
+
+        <!-- Feature 8 -->
+        <div class="feature-card">
+          <div class="feature-icon-box f-icon-emerald">🧭</div>
+          <h3 class="feature-title">Evacuation Route Planning</h3>
+          <p class="feature-desc">Algorithmic turn-by-turn routing via OpenStreetMap/OSRM that dynamically circumvents
+            active Red Zone hazard perimeters.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 5. WHO IT'S FOR ================= -->
+    <section class="section-block" id="who-its-for" aria-labelledby="who-heading">
+      <div class="section-header-compact">
+        <span class="section-tag">Role-Based Access</span>
+        <h2 class="section-title" id="who-heading">Who It's For</h2>
+        <p class="section-desc">
+          Tailored user experiences delivering simplicity for citizens under stress and deep analytical power for
+          command officers.
+        </p>
+      </div>
+
+      <div class="persona-grid">
+        <!-- Authority Card (First) -->
+        <div class="persona-card persona-authority">
+          <div class="persona-header">
+            <div class="persona-avatar avatar-authority">🏛️</div>
+            <div class="persona-meta">
+              <h3>For Authorities</h3>
+              <span class="persona-tagline">Incident Command & Relocation Planning</span>
+            </div>
+          </div>
+
+          <ul class="persona-checklist">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span><strong>Command Center Cockpit:</strong> Full-spectrum GIS situational awareness across coastal
+                Andhra Pradesh.</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span><strong>Risk2Rescue:</strong> Automated polygon generation classifying active high-threat
+                sectors.</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span><strong>Relocation Prioritization:</strong> Objective ranking of vulnerable habitations for
+                immediate triage.</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span><strong>Capacity & Logistics Planning:</strong> Shelter allocation modeling and dispatch
+                coordination with NDRF.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Citizen Card (Second) -->
+        <div class="persona-card persona-citizen">
+          <div class="persona-header">
+            <div class="persona-avatar avatar-citizen">🧑‍💼</div>
+            <div class="persona-meta">
+              <h3>For Citizens</h3>
+              <span class="persona-tagline">Public Safety & Evacuation Navigation</span>
+            </div>
+          </div>
+
+          <ul class="persona-checklist">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span><strong>Check local risk level:</strong> Instant GPS detection of current habitation hazard
+                zone.</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span><strong>Get authoritative alerts:</strong> Official warnings pushed directly from IMD and
+                SDMA.</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span><strong>Find nearby shelters:</strong> Verified evacuation camps with real-time bed & medical
+                capacity.</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+              <span><strong>Report hazards & SOS:</strong> Transmit emergency beacons or ground road blockages
+                instantly.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Informational Closing Note -->
+      <div class="persona-entry-hint-wrapper">
+        <div class="persona-entry-hint">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          <span>Use the <strong>Sign In</strong> button in the top navigation bar to access either portal.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 6. DATA SOURCES SECTION ================= -->
+    <section class="section-block" id="data-sources" aria-labelledby="sources-heading">
+      <div class="section-header-compact">
+        <span class="section-tag">Authoritative Telemetry</span>
+        <h2 class="section-title" id="sources-heading">Integrated Data Feeds</h2>
+        <p class="section-desc">
+          Synthesizing live feeds from official national monitoring agencies and meteorological institutions.
+        </p>
+      </div>
+
+      <div class="data-sources-container">
+        <table class="sources-table">
+          <thead>
+            <tr>
+              <th>Agency / Program</th>
+              <th>Data Contribution</th>
+              <th>Type / Protocol</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="source-org">
+                  <span class="source-bullet" style="background:#ef4444; box-shadow:0 0 8px #ef4444;"></span>
+                  <span>USGS Earthquake Hazards Program</span>
+                </div>
+              </td>
+              <td>Seismic activity, hypocenter telemetry, and magnitude 2.5+ earthquake events.</td>
+              <td>GeoJSON REST Feed</td>
+              <td><span class="source-badge badge-live">● Live Ingestion</span></td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="source-org">
+                  <span class="source-bullet" style="background:#3b82f6; box-shadow:0 0 8px #3b82f6;"></span>
+                  <span>IMD (India Meteorological Department)</span>
+                </div>
+              </td>
+              <td>Rainfall forecasts, cyclone trajectory tracking, and official CAP disaster warning feeds.</td>
+              <td>RSS / CAP Protocol</td>
+              <td><span class="source-badge badge-official">● Official Feed</span></td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="source-org">
+                  <span class="source-bullet" style="background:#06b6d4; box-shadow:0 0 8px #06b6d4;"></span>
+                  <span>Open-Meteo</span>
+                </div>
+              </td>
+              <td>Real-time weather conditions, wind velocity, humidity, barometric pressure, and air quality indexes.
+              </td>
+              <td>REST API</td>
+              <td><span class="source-badge badge-live">● Live Stream</span></td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="source-org">
+                  <span class="source-bullet" style="background:#3b82f6; box-shadow:0 0 8px #3b82f6;"></span>
+                  <span>CWC (Central Water Commission)</span>
+                </div>
+              </td>
+              <td>River basin telemetry, flood discharge rates, and reservoir high-flood level (HFL) thresholds.</td>
+              <td>Hydrological Telemetry</td>
+              <td><span class="source-badge badge-official">● Official Feed</span></td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="source-org">
+                  <span class="source-bullet" style="background:#f59e0b; box-shadow:0 0 8px #f59e0b;"></span>
+                  <span>GSI (Geological Survey of India)</span>
+                </div>
+              </td>
+              <td>Macro-scale landslide susceptibility zoning, slope instability indexes, and terrain classifications.
+              </td>
+              <td>Geological Spatial Layers</td>
+              <td><span class="source-badge badge-official">● Integrated</span></td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="source-org">
+                  <span class="source-bullet" style="background:#06b6d4; box-shadow:0 0 8px #06b6d4;"></span>
+                  <span>INCOIS</span>
+                </div>
+              </td>
+              <td>Tsunami early warnings, ocean wave forecasts, storm surge models, and coastal inundation lines.</td>
+              <td>Ocean State Forecasts</td>
+              <td><span class="source-badge badge-official">● Integrated</span></td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="source-org">
+                  <span class="source-bullet" style="background:#22c55e; box-shadow:0 0 8px #22c55e;"></span>
+                  <span>NDRF (National Disaster Response Force)</span>
+                </div>
+              </td>
+              <td>Emergency battalion readiness, incident dispatch protocol, and multi-agency response coordination.
+              </td>
+              <td>Command Dispatch Protocol</td>
+              <td><span class="source-badge badge-live">● Operational</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ================= 7. REUSED SITE FOOTER ================= -->
+    <footer class="site-footer">
+      <div class="footer-brand">
+        <strong>Risk2Rescue</strong>
+        <span>|</span>
+        <span>Andhra Pradesh</span>
+      </div>
+      <div class="footer-links">
+        <a class="footer-anchor"
+          onclick="showPopup('About', 'Risk2Rescue is an AI-powered disaster management and multi-hazard early warning platform developed for Andhra Pradesh.')">About</a>
+        <a class="footer-anchor"
+          onclick="showPopup('Privacy', 'All citizen telemetry is completely anonymized. Geolocation data is processed client-side.')">Privacy</a>
+        <a class="footer-anchor"
+          onclick="showPopup('Help', 'National Disaster Helpline: 1078 (NDRF) | State Emergency Response: 112')">Help</a>
+        <a class="footer-anchor"
+          onclick="showPopup('Contact', 'AP SDMA Emergency Operation Centre &bull; command@sdma.ap.gov.in')">Contact</a>
+      </div>
+    </footer>
+  </main>
+
+  <!-- Toast Shelf -->
+  <div id="toast-shelf" aria-live="polite"></div>
+
+  <!-- ================= 8. SIGN IN FLOATING MODAL (TASK 3) ================= -->
+  <div class="signin-modal-overlay" id="signInModal" onclick="handleSignInModalBackdrop(event)" role="dialog"
+    aria-modal="true" aria-labelledby="modalHeading">
+    <div class="signin-modal-card">
+      <button type="button" class="signin-modal-close" onclick="closeSignInModal()" aria-label="Close modal">×</button>
+
+      <div class="signin-modal-header">
+        <div class="signin-modal-badge">
+          <span class="dot"></span>
+          <span>Official Portal Access</span>
+        </div>
+        <h2 class="signin-modal-title" id="modalHeading">Choose Your Portal</h2>
+        <p class="signin-modal-subtitle">
+          Select your destination to access specialized disaster response workflows.
+        </p>
+      </div>
+
+      <!-- The exact .portal-box pair, checklists, and buttons moved from index.html -->
+      <div class="signin-portal-grid">
+        <!-- CARD 1: AUTHORITY PORTAL (First) -->
+        <div class="portal-box">
+          <div>
+            <div class="box-top-row">
+              <div class="box-badge-icon authority-badge-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 21h18"></path>
+                  <path d="M3 10h18"></path>
+                  <path d="M5 10v11"></path>
+                  <path d="M9 10v11"></path>
+                  <path d="M15 10v11"></path>
+                  <path d="M19 10v11"></path>
+                  <path d="M12 2l10 8H2l10-8z"></path>
+                </svg>
+              </div>
+              <span class="box-target-label label-authority">For Officials</span>
+            </div>
+
+            <h3 class="box-title">Authority Command Center</h3>
+            <p class="box-description">
+              Advanced GIS tools for disaster management officials
+            </p>
+
+            <div class="checklist-col">
+              <div class="checklist-row">
+                <svg class="check-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="20" x2="18" y2="10"></line>
+                  <line x1="12" y1="20" x2="12" y2="4"></line>
+                  <line x1="6" y1="20" x2="6" y2="14"></line>
+                </svg>
+                <span>Multi-hazard intelligence & risk analysis</span>
+              </div>
+              <div class="checklist-row">
+                <svg class="check-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                <span>Vulnerability assessment & red zones</span>
+              </div>
+              <div class="checklist-row">
+                <svg class="check-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+                </svg>
+                <span>Evacuation planning & relocation tools</span>
+              </div>
+              <div class="checklist-row">
+                <svg class="check-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                <span>Real-time monitoring & decision support</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <button type="button" class="portal-cta btn-blue" onclick="enterAsAuthority()">
+              <span>Authority Login</span>
+              <span>➔</span>
+            </button>
+            <div class="box-footnote">Authorized personnel only</div>
+          </div>
+        </div>
+
+        <!-- CARD 2: CITIZEN PORTAL (Second) -->
+        <div class="portal-box">
+          <div>
+            <div class="box-top-row">
+              <div class="box-badge-icon citizen-badge-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+              </div>
+              <span class="box-target-label label-citizen">For Citizens</span>
+            </div>
+
+            <h3 class="box-title">Citizen Portal</h3>
+            <p class="box-description">
+              Check risks in your area, get alerts, find safe shelters — no account needed
+            </p>
+
+            <div class="checklist-col">
+              <div class="checklist-row">
+                <svg class="check-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <span>View live risk map</span>
+              </div>
+              <div class="checklist-row">
+                <svg class="check-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+                <span>Receive alerts and warnings</span>
+              </div>
+              <div class="checklist-row">
+                <svg class="check-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                  <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                <span>Find nearby safe shelters</span>
+              </div>
+              <div class="checklist-row">
+                <svg class="check-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                <span>Learn emergency procedures</span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <button id="enter-citizen-btn" class="portal-cta btn-green" onclick="enterAsCitizen()">
+              <span>Enter as Citizen</span>
+              <span>➔</span>
+            </button>
+            <div class="box-footnote">No login required &bull; Location-based access</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= LOCATION MODAL (TASK 4 FLOW) ================= -->
+  <div id="loc-modal" class="loc-modal-overlay" onclick="handleLocModalBackdrop(event)">
+    <div class="loc-modal-card" onclick="event.stopPropagation()">
+      <!-- Header -->
+      <div class="loc-modal-header">
+        <div class="loc-modal-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+        </div>
+        <div class="loc-modal-meta">
+          <h3>Citizen Portal Setup</h3>
+          <p>Risk2Rescue — Real-Time Hazard Resolver</p>
+        </div>
+        <button type="button" class="loc-modal-close" onclick="closeLocModal()" aria-label="Close modal">×</button>
+      </div>
+
+      <!-- STATE 1: Requesting / Detecting -->
+      <div id="loc-state-detecting" class="loc-state-panel" style="text-align:center; padding: 12px 0 6px;">
+        <div class="loc-pulse-container" aria-hidden="true">
+          <div class="loc-pulse-ring"></div>
+          <div class="loc-pulse-ring"></div>
+          <div class="loc-pulse-ring"></div>
+          <div class="loc-pulse-core">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="2"></circle>
+              <path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"></path>
+              <path d="M7.8 7.8c-2.3 2.3-2.3 6.1 0 8.5"></path>
+              <path d="M19.1 4.9c3.9 3.9 3.9 10.3 0 14.2"></path>
+              <path d="M4.9 4.9c-3.9 3.9-3.9 10.3 0 14.2"></path>
+            </svg>
+          </div>
+        </div>
+        <h4 class="loc-text-primary">Detecting your location...</h4>
+        <p class="loc-text-secondary">This helps us show hazards near you.</p>
+      </div>
+
+      <!-- STATE 2: Success Confirmation (~800ms auto-redirect) -->
+      <div id="loc-state-success" class="loc-state-panel loc-success-wrap" style="display:none;">
+        <div class="loc-check-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <h4 class="loc-text-primary">Location found: <span id="loc-place-name"
+            class="loc-place-highlight">Detecting...</span></h4>
+        <p class="loc-text-secondary">Connecting to live hazard sensors & risk zone feeds...</p>
+        <div>
+          <a href="javascript:void(0)" class="loc-diff-link" onclick="switchToManualSelection()">Use a different
+            location</a>
+        </div>
+      </div>
+
+      <!-- STATE 3: Fallback / Manual District Dropdown -->
+      <div id="loc-state-fallback" class="loc-state-panel loc-fallback-wrap" style="display:none;">
+        <div id="loc-error-msg" class="loc-fallback-alert">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span id="loc-error-text">Location access was unavailable. Please select your district manually.</span>
+        </div>
+        <label for="loc-district-select" class="loc-label">Select your district manually</label>
+        <select id="loc-district-select" class="loc-select">
+          <option value="">— Choose your Andhra Pradesh District —</option>
+        </select>
+        <button type="button" class="loc-continue-btn" onclick="useManualLocation()">
+          <span>Continue</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
+        <button type="button" class="loc-retry-btn" onclick="retryGeolocation()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+          <span>Retry GPS detection</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shared Scripts for Location & Sign-In Modal -->
+  <script src="js/location-service.js"></script>
+  <script src="js/signin-modal.js"></script>
+
+  <!-- Page Logic Script -->
+  <script>
+    // Toast Notification System (matching portal.html)
+    function showPopup(title, msg) {
+      const shelf = document.getElementById('toast-shelf');
+      if (!shelf) return;
+      const toast = document.createElement('div');
+      toast.style.cssText = 'background: rgba(13, 23, 42, 0.95); border: 1px solid rgba(255,255,255,0.18); color: #fff; padding: 12px 18px; border-radius: 10px; font-size: 13px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); max-width: 380px;';
+      toast.innerHTML = `<strong style="color:#38bdf8;">${title}:</strong> ${msg}`;
+      shelf.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        toast.style.transition = 'all 0.35s ease';
+        setTimeout(() => toast.remove(), 380);
+      }, 3500);
+    }
+
+    // Visual inspection helper for automated screenshot verification
+    const testLocState = new URLSearchParams(window.location.search).get('loc_state');
+    if (testLocState) {
+      if (testLocState === 'success') {
+        window.showLocModal('success', { districtName: 'Visakhapatnam', lat: 17.6868, lng: 83.2185, fullDisplay: 'Visakhapatnam, Andhra Pradesh' });
+      } else {
+        window.showLocModal(testLocState, 'Location access was unavailable. Please select your district manually.');
+      }
+    }
+  </script>
+</body>
+
+</html>

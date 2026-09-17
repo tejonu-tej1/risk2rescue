@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+.venv*/
+__pycache__/
+*.pyc
+
+# Environment
+.env
+
+# Scratch/temp
+scratch/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Large model files
+*.pth
+*.pt
+*.onnx
+*.bin
+*.h5
+
+# Python virtual environments
+ai-service/.venv-terramind/
+ai-service/.venv*/
+ai-service/node_modules/
+ai-service/__pycache__/
+.env.pre-merge.bak

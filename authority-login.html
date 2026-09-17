@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authority Officer Authentication | Risk2Rescue</title>
+  <meta name="description" content="Secure authentication gateway for Andhra Pradesh State Disaster Management Authority (AP SDMA) & NDRF Incident Command personnel.">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Fonts & Design System Tokens -->
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="assets/uicons/css/uicons-regular-rounded.css">
+  <link rel="stylesheet" href="assets/uicons/css/uicons-bold-rounded.css">
+  <script src="js/icons.js"></script>
+  <link rel="stylesheet" href="css/login.css">
+
+  <style>
+    /* ================================================================
+       AUTHORITY-LOGIN.CSS — High-Clearance Incident Command Portal
+       Standardized Dark Command Center Glass System
+       ================================================================ */
+    :root {
+      --font-display: var(--font-heading, 'Times New Roman', Times, serif);
+      --font-body: var(--font-base, 'Inter', -apple-system, BlinkMacSystemFont, sans-serif);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      background-color: var(--bg-base, #f8fafc);
+      color: var(--text-primary, #0f172a);
+      font-family: var(--font-body, sans-serif);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Ambient background radial glow */
+    .ambient-glow {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 50% 12%, rgba(239, 68, 68, 0.05) 0%, transparent 60%),
+        radial-gradient(ellipse 65% 45% at 85% 85%, rgba(37, 99, 235, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 15% 75%, rgba(29, 78, 216, 0.04) 0%, transparent 60%),
+        #f8fafc;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Subtle grid overlay */
+    .grid-overlay {
+      position: fixed;
+      inset: 0;
+      background-image: linear-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    /* Page container layout */
+    .login-page-wrap {
+      position: relative;
+      z-index: 2;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 20px 48px;
+    }
+
+    /* Floating navigation pill at top */
+    .top-nav-bar {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      right: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1100px;
+      margin: 0 auto;
+      pointer-events: auto;
+    }
+
+    .nav-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 18px;
+      background: var(--glass-bg, rgba(255, 255, 255, 0.85));
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border-bright, rgba(15, 23, 42, 0.12));
+      border-radius: var(--radius-full, 9999px);
+      color: var(--text-primary, #0f172a);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      box-shadow: var(--shadow-sm);
+      transition: all var(--transition-normal, 0.2s ease);
+    }
+
+    .nav-back-link:hover {
+      color: #2563eb;
+      background: var(--glass-bg-hover, rgba(255, 255, 255, 0.95));
+      border-color: var(--accent-blue, #2563eb);
+      transform: translateX(-2px);
+    }
+
+    .auth-footer-bottom {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-muted, #64748b);
+    }
+
+    .auth-footer-bottom .dot {
+      color: var(--text-muted, #94a3b8);
+    }
+
+    .nav-status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 14px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      border-radius: var(--radius-full, 9999px);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #dc2626;
+      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15);
+    }
+
+    .status-dot-pulse {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      box-shadow: 0 0 8px #ef4444;
+      animation: pulseAlert 1.8s infinite;
+    }
+
+    @keyframes pulseAlert {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 10px #ef4444; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+
+    /* 1. Header & Branding above card */
+    .brand-header {
+      text-align: center;
+      margin-bottom: 24px;
+      margin-top: 40px;
+    }
+
+    .brand-logo-icon {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 14px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1.5px solid rgba(239, 68, 68, 0.35);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 18px rgba(239, 68, 68, 0.25);
+    }
+
+    .brand-logo-icon svg {
+      width: 32px;
+      height: 32px;
+      color: #ef4444;
+    }
+
+    .brand-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      color: var(--text-primary, #0f172a);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .brand-title span {
+      color: #ef4444;
+    }
+
+    .brand-subtitle {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted, #64748b);
+      letter-spacing: 0.02em;
+    }
+
+    /* 2. Centered Authentication Card */
+    .auth-card {
+      max-width: 480px;
+      width: 100%;
+      background: var(--bg-surface, #ffffff);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border-bright, rgba(15, 23, 42, 0.12));
+      border-radius: var(--radius-xl, 24px);
+      padding: 34px 32px;
+      box-shadow: var(--shadow-lg, 0 24px 64px rgba(15, 23, 42, 0.12));
+      transition: all 0.3s ease;
+      position: relative;
+      color: var(--text-primary, #0f172a);
+    }
+
+    /* Card header / View banner */
+    .auth-card-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--glass-border, rgba(15, 23, 42, 0.08));
+    }
+
+    .auth-badge-emblem {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: rgba(37, 99, 235, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .auth-card-meta h2 {
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-primary, #0f172a);
+      margin-bottom: 2px;
+    }
+
+    .auth-card-meta p {
+      font-size: 12px;
+      color: var(--text-muted, #64748b);
+    }
+
+    /* Form Fields — exact .input-lbl and .input-box styles */
+    .input-row {
+      margin-bottom: 18px;
+      text-align: left;
+    }
+
+    .input-lbl {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-secondary, #475569);
+      margin-bottom: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-box {
+      width: 100%;
+      background: #f8fafc;
+      border: 1px solid rgba(15, 23, 42, 0.15);
+      padding: 12px 14px;
+      border-radius: 10px;
+      color: var(--text-primary, #0f172a);
+      font-size: 13.5px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    /* Subtle blue accent border-glow on focus */
+    .input-box:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+      background: #ffffff;
+    }
+
+    .input-box.is-invalid {
+      border-color: #ef4444;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25);
+    }
+
+    .pw-toggle-btn {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      transition: color 0.2s ease;
+    }
+
+    .pw-toggle-btn:hover {
+      color: #0f172a;
+    }
+
+    /* Inline Validation Error Message */
+    .input-err-msg {
+      font-size: 11.5px;
+      color: #ef4444;
+      margin-top: 5px;
+      display: none;
+      line-height: 1.4;
+    }
+
+    .input-err-msg.is-visible {
+      display: block;
+      animation: errFade 0.2s ease-in;
+    }
+
+    @keyframes errFade {
+      from { opacity: 0; transform: translateY(-3px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Select Dropdown Styling */
+    select.input-box {
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+
+    select.input-box option {
+      background: #ffffff;
+      color: #0f172a;
+      padding: 8px;
+    }
+
+    /* Full-width Submit Buttons (Solid blue pill button per reference) */
+    .btn-submit {
+      width: 100%;
+      padding: 13px 20px;
+      background: #2563eb;
+      color: #ffffff;
+      border: none;
+      border-radius: 9999px;
+      font-size: 14.5px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 4px 16px rgba(37, 99, 235, 0.4);
+      transition: all var(--transition-normal, 0.2s ease);
+      margin-top: 10px;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: #1d4ed8;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 22px rgba(37, 99, 235, 0.5);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: authSpin 0.75s linear infinite;
+      display: none;
+    }
+
+    @keyframes authSpin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Dividers and Switch Links */
+    .view-divider {
+      position: relative;
+      text-align: center;
+      margin: 24px 0 18px;
+    }
+
+    .view-divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--glass-border, rgba(15, 23, 42, 0.08));
+    }
+
+    .view-divider-text {
+      position: relative;
+      display: inline-block;
+      padding: 0 12px;
+      background: #ffffff;
+      font-size: 12px;
+      color: var(--text-muted, #64748b);
+    }
+
+    .toggle-view-btn {
+      background: none;
+      border: none;
+      color: #2563eb;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      transition: color 0.2s ease;
+      font-family: inherit;
+    }
+
+    .toggle-view-btn:hover {
+      color: #1d4ed8;
+    }
+
+    .demo-bypass-wrap {
+      margin-top: 16px;
+      text-align: center;
+    }
+
+    .demo-bypass-link {
+      font-size: 12px;
+      color: #2563eb;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .demo-bypass-link:hover {
+      color: #1d4ed8;
+      text-decoration: underline;
+    }
+
+    /* Views visibility */
+    .auth-view {
+      display: none;
+      animation: viewSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .auth-view.is-active {
+      display: block;
+    }
+
+    @keyframes viewSlide {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Security Notice Strip below card */
+    .security-notice {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 11px;
+      color: #64748b;
+      max-width: 440px;
+      line-height: 1.5;
+    }
+
+    .security-notice strong {
+      color: #0f172a;
+    }
+
+    /* Responsive */
+    @media (max-width: 540px) {
+      .top-nav-bar {
+        position: relative;
+        top: 0;
+        left: 0;
+        right: 0;
+        margin-bottom: 16px;
+      }
+      .brand-header {
+        margin-top: 10px;
+      }
+      .auth-card {
+        padding: 26px 20px;
+        border-radius: 18px;
+      }
+      .brand-title {
+        font-size: 19px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Glow Background -->
+  <div class="ambient-glow" aria-hidden="true"></div>
+  <div class="grid-overlay" aria-hidden="true"></div>
+
+  <div class="login-page-wrap">
+    
+    <!-- Top Nav Pill -->
+    <header class="top-nav-bar">
+      <a href="index.html" class="nav-back-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        <span>Back to Portal</span>
+      </a>
+      <div class="nav-status-chip">
+        <span class="status-dot-pulse"></span>
+        <span>Secure Gateway</span>
+      </div>
+    </header>
+
+    <!-- 1. Brand Header above Card -->
+    <div class="brand-header">
+      <div class="brand-logo-icon" aria-hidden="true">
+        <img src="assets/logo.png" alt="Risk2Rescue Logo" style="width: 36px; height: 36px; object-fit: contain;">
+      </div>
+      <h1 class="brand-title">Risk2<span>Rescue</span></h1>
+      <p class="brand-subtitle">Andhra Pradesh SDMA & NDRF Incident Command</p>
+    </div>
+
+    <!-- 2. Centered Authentication Card -->
+    <main class="auth-card" id="authCard">
+
+      <!-- ================= VIEW 1: SIGN IN (DEFAULT) ================= -->
+      <section class="auth-view is-active" id="signInView" aria-labelledby="signin-heading">
+        <div class="auth-card-top">
+          <div class="auth-badge-emblem" aria-hidden="true"><i class="fi fi-rr-building"></i></div>
+          <div class="auth-card-meta">
+            <h2 id="signin-heading">Officer Authentication</h2>
+            <p>Enter your official credentials for system clearance.</p>
+          </div>
+        </div>
+
+        <form id="signInForm" onsubmit="handleSignInSubmit(event)" novalidate>
+          <!-- Official Email or Username -->
+          <div class="input-row">
+            <label for="signin-email" class="input-lbl">Official Email or Service ID</label>
+            <div class="input-wrapper">
+              <input 
+                type="text" 
+                id="signin-email" 
+                name="identifier" 
+                class="input-box" 
+                placeholder="e.g. officer@sdma.ap.gov.in or AP-SDMA-4029" 
+                autocomplete="username" 
+                required
+              >
+            </div>
+            <div class="input-err-msg" id="signin-email-err">Please enter your official email or service identifier.</div>
+          </div>
+
+          <!-- Password with show/hide toggle -->
+          <div class="input-row">
+            <label for="signin-pw" class="input-lbl">
+              <span>Security Clearance Passcode</span>
+            </label>
+            <div class="input-wrapper">
+              <input 
+                type="password" 
+                id="signin-pw" 
+                name="password" 
+                class="input-box" 
+                placeholder="Enter your security passcode" 
+                autocomplete="current-password" 
+                required
+              >
+              <button 
+                type="button" 
+                class="pw-toggle-btn" 
+                onclick="togglePwVisibility('signin-pw', this)" 
+                aria-label="Toggle password visibility"
+              >
+                👁️
+              </button>
+            </div>
+            <div class="input-err-msg" id="signin-pw-err">Please enter your authorized security passcode.</div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn-submit" id="signin-submit-btn">
+            <span class="btn-spinner" id="signin-spinner" aria-hidden="true"></span>
+            <span id="signin-btn-text">Sign In ➔</span>
+          </button>
+
+          <!-- View Switch Divider -->
+          <div class="view-divider">
+            <span class="view-divider-text">First time here?</span>
+          </div>
+
+          <div style="text-align: center;">
+            <button type="button" class="toggle-view-btn" onclick="showView('createAccountView')">
+              Create an Account
+            </button>
+          </div>
+        </form>
+      </section>
+
+
+      <!-- ================= VIEW 2: CREATE ACCOUNT ================= -->
+      <section class="auth-view" id="createAccountView" aria-labelledby="create-heading">
+        <div class="auth-card-top">
+          <div class="auth-badge-emblem" style="background: #dcfce7; border: 1px solid #bbf7d0;" aria-hidden="true"><i class="fi fi-rr-shield-check"></i></div>
+          <div class="auth-card-meta">
+            <h2 id="create-heading">Personnel Registration</h2>
+            <p>Register official credentials for emergency dispatch access.</p>
+          </div>
+        </div>
+
+        <form id="createAccountForm" onsubmit="handleCreateAccountSubmit(event)" novalidate>
+          <!-- Full Name -->
+          <div class="input-row">
+            <label for="reg-name" class="input-lbl">Full Name</label>
+            <input 
+              type="text" 
+              id="reg-name" 
+              class="input-box" 
+              placeholder="e.g. Commander Rajesh Varma" 
+              autocomplete="name" 
+              required
+            >
+            <div class="input-err-msg" id="reg-name-err">Full Name is required.</div>
+          </div>
+
+          <!-- Official Email -->
+          <div class="input-row">
+            <label for="reg-email" class="input-lbl">Official Email</label>
+            <input 
+              type="email" 
+              id="reg-email" 
+              class="input-box" 
+              placeholder="e.g. r.varma@sdma.ap.gov.in" 
+              autocomplete="email" 
+              required
+            >
+            <div class="input-err-msg" id="reg-email-err">Please enter a valid government / official email address.</div>
+          </div>
+
+          <!-- Phone Number -->
+          <div class="input-row">
+            <label for="reg-phone" class="input-lbl">Official Contact Phone</label>
+            <input 
+              type="tel" 
+              id="reg-phone" 
+              class="input-box" 
+              placeholder="+91 98765 43210" 
+              autocomplete="tel" 
+              required
+            >
+            <div class="input-err-msg" id="reg-phone-err">Please enter a valid phone number (minimum 10 digits).</div>
+          </div>
+
+          <!-- Employee / Officer ID -->
+          <div class="input-row">
+            <label for="reg-officer-id" class="input-lbl">Employee / Officer ID</label>
+            <input 
+              type="text" 
+              id="reg-officer-id" 
+              class="input-box" 
+              placeholder="e.g. AP-SDMA-4029" 
+              required
+            >
+            <div class="input-err-msg" id="reg-officer-id-err">Official Officer ID is required for verification.</div>
+          </div>
+
+          <!-- Department Scope -->
+          <div class="input-row">
+            <label for="reg-dept" class="input-lbl">Department / Agency</label>
+            <select id="reg-dept" class="input-box" required onchange="handleDeptChange()">
+              <option value="">— Select Department / Unit —</option>
+              <option value="AP SDMA Headquarters">AP SDMA — State Headquarters (Amaravati)</option>
+              <option value="NDRF 10th Battalion">NDRF — 10th Battalion Command</option>
+              <option value="DDMA">DDMA — District Disaster Management Authority</option>
+              <option value="SEOC">SEOC — State Emergency Operations Centre</option>
+              <option value="Coastal Zone Management">AP Coastal Zone Management Authority</option>
+              <option value="Other Department">Other Emergency Response Unit</option>
+            </select>
+            <div class="input-err-msg" id="reg-dept-err">Please select your primary department or agency.</div>
+          </div>
+
+          <!-- District Scope (Populated via RZILocationService) -->
+          <div class="input-row" id="reg-district-group">
+            <label for="reg-district" class="input-lbl">Jurisdiction District</label>
+            <select id="reg-district" class="input-box" required>
+              <option value="">— Choose District Jurisdiction —</option>
+              <option value="Statewide">Statewide / State Command</option>
+            </select>
+            <div class="input-err-msg" id="reg-district-err">Please select your operational district jurisdiction.</div>
+          </div>
+
+          <!-- Password -->
+          <div class="input-row">
+            <label for="reg-pw" class="input-lbl">Passcode (Minimum 8 Characters)</label>
+            <div class="input-wrapper">
+              <input 
+                type="password" 
+                id="reg-pw" 
+                class="input-box" 
+                placeholder="Create secure passcode" 
+                autocomplete="new-password" 
+                required
+              >
+              <button 
+                type="button" 
+                class="pw-toggle-btn" 
+                onclick="togglePwVisibility('reg-pw', this)" 
+                aria-label="Toggle password visibility"
+              >
+                👁️
+              </button>
+            </div>
+            <div class="input-err-msg" id="reg-pw-err">Password must be at least 8 characters long.</div>
+          </div>
+
+          <!-- Confirm Password -->
+          <div class="input-row">
+            <label for="reg-confirm-pw" class="input-lbl">Confirm Passcode</label>
+            <div class="input-wrapper">
+              <input 
+                type="password" 
+                id="reg-confirm-pw" 
+                class="input-box" 
+                placeholder="Re-enter passcode" 
+                autocomplete="new-password" 
+                required
+              >
+              <button 
+                type="button" 
+                class="pw-toggle-btn" 
+                onclick="togglePwVisibility('reg-confirm-pw', this)" 
+                aria-label="Toggle password visibility"
+              >
+                👁️
+              </button>
+            </div>
+            <div class="input-err-msg" id="reg-confirm-pw-err">Passcodes do not match. Please verify.</div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn-submit" id="create-submit-btn">
+            <span class="btn-spinner" id="create-spinner" aria-hidden="true"></span>
+            <span id="create-btn-text">Create Account & Continue ➔</span>
+          </button>
+
+          <!-- Back to Sign In Link -->
+          <div class="view-divider">
+            <span class="view-divider-text">Already registered?</span>
+          </div>
+
+          <div style="text-align: center;">
+            <button type="button" class="toggle-view-btn" onclick="showView('signInView')">
+              ← Back to Sign In
+            </button>
+          </div>
+        </form>
+      </section>
+
+    </main>
+
+    <!-- Security Footnote -->
+    <div class="security-notice">
+      <strong>OFFICIAL DISASTER MANAGEMENT COMMAND PORTAL</strong><br>
+      Unauthorized access attempts are monitored and logged under the Information Technology Act & National Disaster Management Act.
+      <div style="margin-top: 6px; font-size: 11px; opacity: 0.8;">
+        Icons: Uicons by <a href="https://www.flaticon.com/uicons" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">Flaticon</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Firebase Live Database & Auth SDKs (Part C) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+
+  <!-- Reusable Location Service for AP Districts Dropdown -->
+  <script src="js/location-service.js"></script>
+
+  <script>
+    /* ================================================================
+       AUTHENTICATION CONTROLLER & FIREBASE AUTHENTICATION (PART C)
+       ================================================================ */
+
+    let auth = null;
+    let db = null;
+
+    // Initialize Firebase Services
+    function initFirebaseServices() {
+      if (typeof firebase !== 'undefined') {
+        try {
+          const config = (typeof getFirebaseConfig === 'function') ? getFirebaseConfig() : null;
+          if (config && !firebase.apps.length) {
+            firebase.initializeApp(config);
+          }
+          auth = firebase.auth();
+          db = firebase.firestore();
+        } catch (e) {
+          console.warn('Firebase initialization warning:', e);
+        }
+      }
+    }
+
+    // 1. Initialize District Dropdown & Firebase
+    document.addEventListener('DOMContentLoaded', () => {
+      initFirebaseServices();
+
+      const distSelect = document.getElementById('reg-district');
+      if (distSelect && window.RZILocationService) {
+        const districts = window.RZILocationService.getAPDistricts();
+        districts.forEach(d => {
+          const opt = document.createElement('option');
+          opt.value = d.name;
+          opt.textContent = `${d.name} District`;
+          distSelect.appendChild(opt);
+        });
+      }
+
+      // View selector via URL query param for automated testing / direct linking
+      const urlView = new URLSearchParams(window.location.search).get('view');
+      if (urlView === 'create' || urlView === 'register') {
+        showView('createAccountView');
+      }
+
+      if (new URLSearchParams(window.location.search).get('test_err') === '1') {
+        setTimeout(() => {
+          document.getElementById('createAccountForm').dispatchEvent(new Event('submit', { cancelable: true }));
+        }, 150);
+      }
+    });
+
+    // 2. View Switcher (Sign In <-> Create Account)
+    function showView(viewId) {
+      document.querySelectorAll('.auth-view').forEach(view => {
+        view.classList.remove('is-active');
+      });
+      const targetView = document.getElementById(viewId);
+      if (targetView) {
+        targetView.classList.add('is-active');
+      }
+    }
+
+    // 3. Password Visibility Toggle
+    function togglePwVisibility(fieldId, btnEl) {
+      const field = document.getElementById(fieldId);
+      if (!field) return;
+      if (field.type === 'password') {
+        field.type = 'text';
+        btnEl.textContent = '🔒';
+        btnEl.setAttribute('aria-label', 'Hide password');
+      } else {
+        field.type = 'password';
+        btnEl.textContent = '👁️';
+        btnEl.setAttribute('aria-label', 'Show password');
+      }
+    }
+
+    // 4. Department change listener for district scope customization
+    function handleDeptChange() {
+      const dept = document.getElementById('reg-dept').value;
+      const distGroup = document.getElementById('reg-district-group');
+      const distSelect = document.getElementById('reg-district');
+      if (!distGroup || !distSelect) return;
+      
+      if (dept === 'AP SDMA Headquarters' || dept === 'SEOC') {
+        distSelect.value = 'Statewide';
+      }
+    }
+
+    // Helper: Mark field error
+    function setError(inputEl, errEl, message) {
+      inputEl.classList.add('is-invalid');
+      errEl.textContent = message;
+      errEl.classList.add('is-visible');
+    }
+
+    // Helper: Clear field error
+    function clearError(inputEl, errEl) {
+      inputEl.classList.remove('is-invalid');
+      errEl.classList.remove('is-visible');
+    }
+
+    // Secure SHA-256 Passcode Hashing (Web Crypto API)
+    async function hashPasscode(passcode) {
+      const enc = new TextEncoder();
+      const data = enc.encode(passcode + '_rzi_salt_2026');
+      const buf = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // Retrieve securely stored accounts with default master officer account
+    async function getStoredAuthorityAccounts() {
+      const raw = localStorage.getItem('rzi_authority_accounts');
+      let accounts = [];
+      try {
+        if (raw) accounts = JSON.parse(raw);
+      } catch (e) {
+        accounts = [];
+      }
+      if (!Array.isArray(accounts) || accounts.length === 0) {
+        const masterHash = await hashPasscode('DisasterCommand2026!');
+        accounts = [
+          {
+            email: 'commander@sdma.ap.gov.in',
+            officerId: 'AP-SDMA-CMD-001',
+            name: 'Director R. Mehra',
+            department: 'AP SDMA Incident Command',
+            district: 'Statewide',
+            clearanceLevel: 'LEVEL-3 (VERIFIED DISPATCH)',
+            passwordHash: masterHash,
+            registeredAt: new Date().toISOString()
+          }
+        ];
+        try {
+          localStorage.setItem('rzi_authority_accounts', JSON.stringify(accounts));
+        } catch (e) {}
+      }
+      return accounts;
+    }
+
+    // 5. Sign In Form Handler — Secure Hashed Validation & Strict Access Control
+    async function handleSignInSubmit(e) {
+      e.preventDefault();
+
+      const emailInput = document.getElementById('signin-email');
+      const pwInput    = document.getElementById('signin-pw');
+      const emailErr   = document.getElementById('signin-email-err');
+      const pwErr      = document.getElementById('signin-pw-err');
+      const submitBtn  = document.getElementById('signin-submit-btn');
+      const btnText    = document.getElementById('signin-btn-text');
+      const spinner    = document.getElementById('signin-spinner');
+
+      let isValid = true;
+      const identifier = emailInput.value.trim();
+      const password = pwInput.value.trim();
+
+      // Validate email / username
+      if (!identifier) {
+        setError(emailInput, emailErr, 'Official email or service identifier is required.');
+        isValid = false;
+      } else {
+        clearError(emailInput, emailErr);
+      }
+
+      // Validate password
+      if (!password) {
+        setError(pwInput, pwErr, 'Security passcode is required.');
+        isValid = false;
+      } else {
+        clearError(pwInput, pwErr);
+      }
+
+      if (!isValid) return;
+
+      submitBtn.disabled = true;
+      spinner.style.display = 'inline-block';
+      btnText.textContent = 'Verifying clearance credentials...';
+
+      try {
+        const inputHash = await hashPasscode(password);
+        const accounts = await getStoredAuthorityAccounts();
+        const idLower = identifier.toLowerCase();
+
+        const match = accounts.find(a =>
+          (a.email.toLowerCase() === idLower || (a.officerId && a.officerId.toLowerCase() === idLower)) &&
+          a.passwordHash === inputHash
+        );
+
+        if (!match) {
+          // Clear error without leaking whether the username or password was wrong
+          setError(emailInput, emailErr, 'Invalid credentials. Please verify your officer credentials and security passcode.');
+          setError(pwInput, pwErr, 'Invalid credentials. Please verify your officer credentials and security passcode.');
+          submitBtn.disabled = false;
+          spinner.style.display = 'none';
+          btnText.textContent = 'Sign In ➔';
+          return;
+        }
+
+        const profile = {
+          name: match.name || identifier.split('@')[0],
+          email: match.email,
+          officerId: match.officerId || identifier,
+          department: match.department || 'AP SDMA Incident Command',
+          district: match.district || 'Statewide',
+          clearanceLevel: match.clearanceLevel || 'LEVEL-3 (OPERATIONAL DISPATCH)',
+          authenticatedAt: new Date().toISOString()
+        };
+
+        sessionStorage.setItem('rzi_authority_officer', JSON.stringify(profile));
+        document.cookie = "rzi_auth=true; path=/";
+        btnText.textContent = 'Clearance verified ➔';
+        setTimeout(() => {
+          window.location.href = 'authority.html';
+        }, 350);
+      } catch (err) {
+        console.error('Authentication verification error:', err);
+        setError(pwInput, pwErr, 'Authentication system error. Please retry.');
+        submitBtn.disabled = false;
+        spinner.style.display = 'none';
+        btnText.textContent = 'Sign In ➔';
+      }
+    }
+
+    // 6. Create Account Form Handler — Firebase Auth createUserWithEmailAndPassword + Firestore (Part C)
+    async function handleCreateAccountSubmit(e) {
+      e.preventDefault();
+
+      const nameInput     = document.getElementById('reg-name');
+      const emailInput    = document.getElementById('reg-email');
+      const phoneInput    = document.getElementById('reg-phone');
+      const officerInput  = document.getElementById('reg-officer-id');
+      const deptInput     = document.getElementById('reg-dept');
+      const districtInput = document.getElementById('reg-district');
+      const pwInput       = document.getElementById('reg-pw');
+      const confirmPw     = document.getElementById('reg-confirm-pw');
+
+      const nameErr     = document.getElementById('reg-name-err');
+      const emailErr    = document.getElementById('reg-email-err');
+      const phoneErr    = document.getElementById('reg-phone-err');
+      const officerErr  = document.getElementById('reg-officer-id-err');
+      const deptErr     = document.getElementById('reg-dept-err');
+      const districtErr = document.getElementById('reg-district-err');
+      const pwErr       = document.getElementById('reg-pw-err');
+      const confirmErr  = document.getElementById('reg-confirm-pw-err');
+
+      const submitBtn = document.getElementById('create-submit-btn');
+      const btnText   = document.getElementById('create-btn-text');
+      const spinner   = document.getElementById('create-spinner');
+
+      let isValid = true;
+
+      // Full Name
+      if (!nameInput.value.trim()) {
+        setError(nameInput, nameErr, 'Full Name is required.');
+        isValid = false;
+      } else {
+        clearError(nameInput, nameErr);
+      }
+
+      // Email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailInput.value.trim()) {
+        setError(emailInput, emailErr, 'Official Email is required.');
+        isValid = false;
+      } else if (!emailRegex.test(emailInput.value.trim())) {
+        setError(emailInput, emailErr, 'Please enter a valid email format (e.g. officer@sdma.ap.gov.in).');
+        isValid = false;
+      } else {
+        clearError(emailInput, emailErr);
+      }
+
+      // Phone validation (digits check >= 10)
+      const phoneDigits = phoneInput.value.replace(/\D/g, '');
+      if (!phoneInput.value.trim()) {
+        setError(phoneInput, phoneErr, 'Official contact phone number is required.');
+        isValid = false;
+      } else if (phoneDigits.length < 10) {
+        setError(phoneInput, phoneErr, 'Please enter a valid phone number with at least 10 digits.');
+        isValid = false;
+      } else {
+        clearError(phoneInput, phoneErr);
+      }
+
+      // Officer ID
+      if (!officerInput.value.trim()) {
+        setError(officerInput, officerErr, 'Employee/Officer ID is required.');
+        isValid = false;
+      } else {
+        clearError(officerInput, officerErr);
+      }
+
+      // Department
+      if (!deptInput.value) {
+        setError(deptInput, deptErr, 'Please select your department or agency.');
+        isValid = false;
+      } else {
+        clearError(deptInput, deptErr);
+      }
+
+      // District
+      if (!districtInput.value) {
+        setError(districtInput, districtErr, 'Please select your jurisdiction district.');
+        isValid = false;
+      } else {
+        clearError(districtInput, districtErr);
+      }
+
+      // Password minimum length (>= 8 chars)
+      if (!pwInput.value) {
+        setError(pwInput, pwErr, 'Security passcode is required.');
+        isValid = false;
+      } else if (pwInput.value.length < 8) {
+        setError(pwInput, pwErr, 'Passcode must be at least 8 characters long.');
+        isValid = false;
+      } else {
+        clearError(pwInput, pwErr);
+      }
+
+      // Confirm Password
+      if (!confirmPw.value) {
+        setError(confirmPw, confirmErr, 'Please confirm your passcode.');
+        isValid = false;
+      } else if (pwInput.value !== confirmPw.value) {
+        setError(confirmPw, confirmErr, 'Passcodes do not match. Please verify.');
+        isValid = false;
+      } else {
+        clearError(confirmPw, confirmErr);
+      }
+
+      if (!isValid) {
+        const firstError = document.querySelector('.input-box.is-invalid');
+        if (firstError) firstError.focus();
+        return;
+      }
+
+      submitBtn.disabled = true;
+      spinner.style.display = 'inline-block';
+      btnText.textContent = 'Registering clearance credentials...';
+
+      const passwordHash = await hashPasscode(pwInput.value);
+      const officerData = {
+        name: nameInput.value.trim(),
+        email: emailInput.value.trim(),
+        phone: phoneInput.value.trim(),
+        officerId: officerInput.value.trim(),
+        department: deptInput.value,
+        district: districtInput.value,
+        passwordHash: passwordHash,
+        clearanceLevel: 'LEVEL-3 (VERIFIED DISPATCH)',
+        registeredAt: new Date().toISOString()
+      };
+
+      // Persist in secure authority account storage (hashed credentials)
+      try {
+        const accounts = await getStoredAuthorityAccounts();
+        const existingIdx = accounts.findIndex(a => a.email.toLowerCase() === officerData.email.toLowerCase());
+        if (existingIdx >= 0) {
+          accounts[existingIdx] = officerData;
+        } else {
+          accounts.push(officerData);
+        }
+        localStorage.setItem('rzi_authority_accounts', JSON.stringify(accounts));
+      } catch (storeErr) {
+        console.warn('Local account store error:', storeErr);
+      }
+
+      // 1. Firebase Auth createUserWithEmailAndPassword + Firestore "officers" collection if available
+      if (auth) {
+        try {
+          const userCredential = await auth.createUserWithEmailAndPassword(emailInput.value.trim(), pwInput.value);
+          const user = userCredential.user;
+          officerData.uid = user.uid;
+
+          try {
+            await user.updateProfile({ displayName: officerData.name });
+          } catch (_) {}
+
+          // Write profile fields to Firestore "officers" collection (Part C)
+          if (db) {
+            try {
+              await db.collection('officers').doc(user.uid).set({
+                name: officerData.name,
+                email: officerData.email,
+                phone: officerData.phone,
+                officerId: officerData.officerId,
+                department: officerData.department,
+                district: officerData.district,
+                clearanceLevel: officerData.clearanceLevel,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+              });
+            } catch (dbErr) {
+              console.warn('Firestore officers write warning:', dbErr);
+            }
+          }
+
+          sessionStorage.setItem('rzi_authority_officer', JSON.stringify(officerData));
+          document.cookie = "rzi_auth=true; path=/";
+          btnText.textContent = 'Account created ➔ Redirecting...';
+          setTimeout(() => {
+            window.location.href = 'authority.html';
+          }, 450);
+          return;
+        } catch (authErr) {
+          console.warn('Firebase createUser error:', authErr);
+          if (authErr.code === 'auth/email-already-in-use') {
+            setError(emailInput, emailErr, 'This official email is already registered. Please sign in instead.');
+            submitBtn.disabled = false;
+            spinner.style.display = 'none';
+            btnText.textContent = 'Create Account & Continue ➔';
+            return;
+          } else if (authErr.code === 'auth/weak-password') {
+            setError(pwInput, pwErr, 'Passcode is too weak. Please use at least 8 characters.');
+            submitBtn.disabled = false;
+            spinner.style.display = 'none';
+            btnText.textContent = 'Create Account & Continue ➔';
+            return;
+          }
+
+          // Fallback for offline/demo environment
+          sessionStorage.setItem('rzi_authority_officer', JSON.stringify(officerData));
+          document.cookie = "rzi_auth=true; path=/";
+          btnText.textContent = 'Account created ➔ Redirecting...';
+          setTimeout(() => {
+            window.location.href = 'authority.html';
+          }, 500);
+          return;
+        }
+      }
+
+      sessionStorage.setItem('rzi_authority_officer', JSON.stringify(officerData));
+      document.cookie = "rzi_auth=true; path=/";
+      setTimeout(() => {
+        window.location.href = 'authority.html';
+      }, 700);
+    }
+  </script>
+</body>
+</html>

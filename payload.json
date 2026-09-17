@@ -1,0 +1,5 @@
+{
+    "model": "deepseek-r1:8b",
+    "prompt": "Are you working?",
+    "stream": false
+}

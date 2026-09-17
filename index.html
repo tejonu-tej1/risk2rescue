@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Risk2Rescue | Real-Time Disaster Intelligence & Hazard Mapping</title>
+  <meta name="description"
+    content="Intelligent hazard mapping and relocation planning for vulnerable habitations. Real-time multi-hazard early warning powered by live telemetry.">
+
+  <!-- Favicon -->
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+
+  <!-- Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+
+  <!-- Core Design System -->
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="assets/uicons/css/uicons-regular-rounded.css">
+  <link rel="stylesheet" href="assets/uicons/css/uicons-bold-rounded.css">
+  <script src="js/icons.js"></script>
+
+  <!-- Sign In Floating Modal Styles -->
+  <link rel="stylesheet" href="css/signin-modal.css">
+
+  <style>
+    /* ================================================================
+       RISK2RESCUE — LANDING EXPERIENCE
+       Uses css/base.css tokens as single source of truth
+       ================================================================ */
+    :root {
+      --font-display: var(--font-heading, 'Times New Roman', Times, serif);
+      --font-body: var(--font-base, 'Inter', -apple-system, BlinkMacSystemFont, sans-serif);
+      --radius-pill: 9999px;
+      --radius-lg: 18px;
+      --transition-smooth: 320ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      background-color: var(--bg-base);
+      scroll-behavior: smooth;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100vh;
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      position: relative;
+      background: transparent;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* ================= 1. FULL-BLEED VIDEO & OVERLAY ================= */
+    .video-background-container {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .video-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      opacity: 1;
+      transform: scale(1.02);
+    }
+
+    /* Static poster fallback container for reduced-motion or slow network */
+    .video-poster-fallback {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('assets/hero-bg-2-poster.jpg');
+      background-size: cover;
+      background-position: center;
+      opacity: 1;
+      z-index: 0;
+    }
+
+    /* Dark storm cinematic gradient overlay for video background */
+    .video-gradient-overlay {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 2;
+      pointer-events: none;
+      background: linear-gradient(180deg,
+          rgba(10, 16, 28, 0.62) 0%,
+          rgba(8, 14, 26, 0.45) 40%,
+          rgba(8, 14, 26, 0.65) 80%,
+          rgba(6, 11, 20, 0.88) 100%);
+      backdrop-filter: blur(1.5px);
+      -webkit-backdrop-filter: blur(1.5px);
+    }
+
+    /* ================= 2. PILL-SHAPED FLOATING NAV BAR ================= */
+    .floating-nav-wrapper {
+      position: fixed;
+      top: 24px;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      display: flex;
+      justify-content: center;
+      padding: 0 16px;
+      pointer-events: none;
+      /* Allows clicks around the pill */
+    }
+
+    .pill-navbar {
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      width: 100%;
+      max-width: 680px;
+      padding: 8px 10px 8px 18px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-pill);
+      box-shadow: 0 12px 36px rgba(15, 23, 42, 0.14), 0 2px 8px rgba(15, 23, 42, 0.06);
+      transition: all var(--transition-smooth);
+    }
+
+    .pill-navbar:hover {
+      border-color: var(--glass-border-bright);
+      background: var(--glass-bg-hover);
+      box-shadow: 0 16px 42px rgba(15, 23, 42, 0.20), 0 0 20px rgba(29, 78, 216, 0.12);
+    }
+
+    /* Left: App Logo/Icon */
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text-primary);
+      user-select: none;
+    }
+
+    .nav-logo-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 12px rgba(220, 38, 38, 0.25);
+      flex-shrink: 0;
+    }
+
+    .nav-logo-icon svg {
+      width: 17px;
+      height: 17px;
+      fill: none;
+      stroke: #dc2626;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .nav-brand-title {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-primary);
+    }
+
+    .nav-brand-title .red-text {
+      color: #dc2626;
+    }
+
+    /* Center/Right Nav links */
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .nav-link {
+      font-family: var(--font-body);
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-decoration: none;
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .nav-link:hover {
+      color: var(--accent-blue);
+      background: rgba(29, 78, 216, 0.08);
+    }
+
+    /* Distinct Sign In Button (Pill button) */
+    .nav-actions {
+      position: relative;
+    }
+
+    .nav-signin-btn {
+      font-family: var(--font-body);
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #ffffff;
+      background: var(--accent-blue);
+      border: none;
+      outline: none;
+      padding: 7px 18px;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(29, 78, 216, 0.35);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .nav-signin-btn:hover {
+      background: #1e40af;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(29, 78, 216, 0.45);
+    }
+
+    .nav-signin-btn:active {
+      transform: translateY(0) scale(0.97);
+    }
+
+    /* Floating Nav Sign In Popover (Anchored Dropdown - Dark Glass Card) */
+    .nav-signin-popover {
+      position: fixed;
+      width: 290px;
+      background: var(--bg-surface, #ffffff);
+      border: 1px solid var(--glass-border-bright, rgba(15, 23, 42, 0.12));
+      border-radius: 16px;
+      padding: 10px;
+      box-shadow: var(--shadow-lg, 0 20px 50px rgba(15, 23, 42, 0.15));
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      opacity: 0;
+      transform: translateY(-8px) scale(0.96);
+      transform-origin: top right;
+      transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.22s;
+      pointer-events: none;
+      visibility: hidden;
+    }
+
+    .nav-signin-popover.is-open {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+      visibility: visible;
+    }
+
+    .popover-divider {
+      height: 1px;
+      background: var(--glass-border);
+      margin: 4px 6px;
+    }
+
+    .popover-header-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      padding: 6px 10px 4px;
+      text-align: left;
+    }
+
+    .popover-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 11px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-primary);
+      text-decoration: none;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.18s ease;
+      width: 100%;
+      box-sizing: border-box;
+      font-family: var(--font-body);
+    }
+
+    .popover-item:hover {
+      background: rgba(15, 23, 42, 0.05);
+      border-color: var(--glass-border);
+      transform: translateY(-1px);
+    }
+
+    .popover-item-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .popover-citizen .popover-item-icon {
+      background: rgba(34, 197, 94, 0.18);
+      border: 1px solid rgba(34, 197, 94, 0.35);
+      color: #4ade80;
+    }
+
+    .popover-authority .popover-item-icon {
+      background: rgba(59, 130, 246, 0.18);
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      color: #60a5fa;
+    }
+
+    .popover-item-content {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .popover-item-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.25;
+    }
+
+    .popover-item-desc {
+      font-size: 11px;
+      color: var(--text-secondary);
+      line-height: 1.3;
+      margin-top: 2px;
+    }
+
+    .popover-item-arrow {
+      font-size: 14px;
+      color: var(--accent-blue);
+      transition: transform 0.18s ease, color 0.18s ease;
+    }
+
+    .popover-item:hover .popover-item-arrow {
+      transform: translateX(3px);
+    }
+
+    /* ================= 3. CENTERED HERO CONTENT ================= */
+    .hero-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 90px;
+      position: relative;
+      z-index: 10;
+      max-width: 960px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Pill-shaped badge above title */
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 6px 16px;
+      border-radius: var(--radius-pill);
+      background: rgba(15, 23, 42, 0.70);
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      color: #fca5a5;
+      font-size: 12.5px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      margin-bottom: 24px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+      user-select: none;
+      animation: badgeGlow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes badgeGlow {
+      0% {
+        box-shadow: 0 0 16px rgba(239, 68, 68, 0.20);
+        border-color: rgba(239, 68, 68, 0.35);
+      }
+
+      100% {
+        box-shadow: 0 0 28px rgba(239, 68, 68, 0.45);
+        border-color: rgba(239, 68, 68, 0.65);
+      }
+    }
+
+    .badge-pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ef4444;
+      position: relative;
+      box-shadow: 0 0 8px #ef4444;
+    }
+
+    .badge-pulse-dot::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 1.5px solid #ef4444;
+      animation: pulseRipple 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+    }
+
+    @keyframes pulseRipple {
+      0% {
+        transform: scale(0.6);
+        opacity: 1;
+      }
+
+      100% {
+        transform: scale(2.2);
+        opacity: 0;
+      }
+    }
+
+    /* Large Project Name */
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.8rem, 6.5vw, 5.2rem);
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      line-height: 1.08;
+      color: #ffffff;
+      margin-bottom: 20px;
+      text-shadow: 0 4px 28px rgba(0, 0, 0, 0.75), 0 2px 10px rgba(0, 0, 0, 0.5);
+      user-select: none;
+    }
+
+    .hero-title-red {
+      color: #ef4444;
+      text-shadow: 0 0 32px rgba(239, 68, 68, 0.65), 0 2px 10px rgba(0, 0, 0, 0.5);
+      display: inline-block;
+    }
+
+    /* Part A: Italic accent word in headline */
+    .hero-title-accent {
+      font-style: italic;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      opacity: 0.96;
+      color: #f1f5f9;
+      display: inline-block;
+    }
+
+    /* Tagline */
+    .hero-tagline {
+      font-size: clamp(1.05rem, 2vw, 1.28rem);
+      color: #cbd5e1;
+      font-weight: 500;
+      line-height: 1.55;
+      max-width: 700px;
+      margin: 0 auto 38px;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Part A: Hero CTA Row (Dominant Primary + De-emphasized Ghost Button) */
+    .hero-cta-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .hero-buttons-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .hero-cta-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 32px;
+      border-radius: var(--radius-pill);
+      font-family: var(--font-body);
+      font-size: 15.5px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all var(--transition-smooth);
+      position: relative;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    /* Dominant Primary CTA (Pill Button, Official Blue) */
+    .hero-cta-primary {
+      color: #ffffff;
+      background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #3b82f6 100%);
+      box-shadow: 0 8px 28px rgba(29, 78, 216, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+      border: none;
+    }
+
+    .hero-cta-primary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.6s ease;
+    }
+
+    .hero-cta-primary:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 12px 36px rgba(29, 78, 216, 0.55), 0 0 25px rgba(29, 78, 216, 0.35);
+    }
+
+    .hero-cta-primary:hover::before {
+      left: 100%;
+    }
+
+    /* Secondary / Ghost CTA (Authority) - border only */
+    .hero-cta-ghost {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: 0 4px 18px rgba(15, 23, 42, 0.15);
+    }
+
+    .hero-cta-ghost:hover {
+      background: rgba(255, 255, 255, 0.22);
+      border-color: rgba(255, 255, 255, 0.6);
+      color: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25);
+    }
+
+    .hero-cta-ghost:active,
+    .hero-cta-primary:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .hero-cta-arrow {
+      transition: transform 0.2s ease;
+    }
+
+    .hero-cta-btn:hover .hero-cta-arrow {
+      transform: translateX(4px);
+    }
+
+    /* Subtle quick portal link helper */
+    .hero-portal-shortcut {
+      font-size: 13.5px;
+      color: #93c5fd;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+    }
+
+    .hero-portal-shortcut:hover {
+      color: #bfdbfe;
+    }
+
+    .hero-portal-shortcut span {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    /* ================= 4. COLLAPSIBLE DATA-SOURCE CREDIT STRIP ================= */
+    .credit-strip-wrapper {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 40;
+      display: flex;
+      justify-content: center;
+    }
+
+    .credit-strip-container {
+      width: 100%;
+      max-width: 940px;
+      background: #ffffff;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid var(--glass-border-bright);
+      border-left: 1px solid var(--glass-border);
+      border-right: 1px solid var(--glass-border);
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
+      box-shadow: 0 -8px 30px rgba(15, 23, 42, 0.10);
+      transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease;
+      /* Starts peeked with only the handle visible */
+      transform: translateY(calc(100% - 38px));
+      cursor: pointer;
+      user-select: none;
+      color: var(--text-primary);
+    }
+
+    /* Desktop hover or mobile active/expanded state */
+    .credit-strip-container:hover,
+    .credit-strip-container.is-expanded {
+      transform: translateY(0);
+      background: var(--bg-surface, #ffffff);
+      border-top-color: var(--accent-blue);
+      box-shadow: 0 -12px 40px rgba(15, 23, 42, 0.12);
+    }
+
+    /* Default Header Handle */
+    .credit-strip-header {
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 20px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .credit-strip-container:hover .credit-strip-header,
+    .credit-strip-container.is-expanded .credit-strip-header {
+      color: var(--text-primary);
+    }
+
+    .credit-indicator-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--risk-green);
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+    }
+
+    .credit-chevron {
+      display: inline-block;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent-blue);
+    }
+
+    .credit-strip-container:hover .credit-chevron,
+    .credit-strip-container.is-expanded .credit-chevron {
+      transform: rotate(-90deg);
+    }
+
+    /* Expanded Content Drawer */
+    .credit-strip-content {
+      padding: 8px 24px 22px;
+      background: transparent;
+    }
+
+    .credit-strip-intro {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .credit-strip-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-primary);
+    }
+
+    .credit-strip-badge {
+      font-size: 10.5px;
+      color: #4ade80;
+      background: rgba(34, 197, 94, 0.18);
+      border: 1px solid rgba(34, 197, 94, 0.35);
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .credit-sources-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+    }
+
+    .source-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .source-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--accent-blue);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .source-icon-wrap {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .source-icon-wrap svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .source-info {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .source-name {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .source-desc {
+      font-size: 10px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    /* Distinct source icon colors */
+    .icon-usgs {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+
+    .icon-imd {
+      background: rgba(59, 130, 246, 0.2);
+      color: #93c5fd;
+      border: 1px solid rgba(59, 130, 246, 0.4);
+    }
+
+    .icon-meteo {
+      background: rgba(6, 182, 212, 0.2);
+      color: #67e8f9;
+      border: 1px solid rgba(6, 182, 212, 0.4);
+    }
+
+    .icon-windy {
+      background: rgba(249, 115, 22, 0.2);
+      color: #fdba74;
+      border: 1px solid rgba(249, 115, 22, 0.4);
+    }
+
+    .icon-osrm {
+      background: rgba(34, 197, 94, 0.2);
+      color: #86efac;
+      border: 1px solid rgba(34, 197, 94, 0.4);
+    }
+
+
+    /* ================= 6. ACCESSIBILITY & PREFERS-REDUCED-MOTION ================= */
+    @media (prefers-reduced-motion: reduce) {
+      .video-background {
+        display: none !important;
+      }
+
+      .video-poster-fallback {
+        z-index: -2 !important;
+      }
+
+      .hero-badge,
+      .badge-pulse-dot::after {
+        animation: none !important;
+      }
+
+      .credit-strip-container {
+        transition: none !important;
+      }
+
+      .hero-cta-btn::before {
+        display: none !important;
+      }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 640px) {
+      .floating-nav-wrapper {
+        top: 14px;
+      }
+
+      .pill-navbar {
+        padding: 6px 8px 6px 14px;
+        gap: 12px;
+      }
+
+      .nav-brand-title {
+        font-size: 13.5px;
+      }
+
+      .hero-section {
+        padding: 100px 16px 80px;
+      }
+
+      .hero-title {
+        font-size: 2.3rem;
+      }
+
+      .hero-tagline {
+        font-size: 1rem;
+      }
+
+      .credit-sources-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .credit-strip-container {
+        transform: translateY(calc(100% - 36px));
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ================= 1. FULL-BLEED VIDEO BACKGROUND ================= -->
+  <div class="video-background-container" aria-hidden="true">
+    <div class="video-poster-fallback"></div>
+    <video id="bg-video" class="video-background" autoplay loop muted playsinline poster="assets/hero-bg-2-poster.jpg"
+      preload="auto">
+      <source src="assets/hero-bg-2.mp4" type="video/mp4">
+    </video>
+  </div>
+
+  <!-- Dark Gradient Legibility Overlay -->
+  <div class="video-gradient-overlay" aria-hidden="true"></div>
+
+  <!-- ================= 2. PILL-SHAPED FLOATING NAV BAR ================= -->
+  <header class="floating-nav-wrapper">
+    <nav class="pill-navbar" aria-label="Main Navigation">
+      <!-- App Logo / Icon -->
+      <a href="index.html" class="nav-brand" title="Risk2Rescue">
+        <div class="nav-logo-icon">
+          <img src="assets/logo.png" alt="Risk2Rescue Logo" style="width: 22px; height: 22px; object-fit: contain;">
+        </div>
+        <span class="nav-brand-title">
+          <span class="red-text">Risk2</span>Rescue
+        </span>
+      </a>
+
+      <!-- Nav Links & Distinct Sign In Button with Floating Popover -->
+      <div class="nav-actions">
+        <a href="get-started.html" class="nav-link" id="nav-about-link">About Us</a>
+        <button type="button" class="nav-signin-btn" id="nav-signin-btn" onclick="toggleNavSigninDropdown(event)"
+          aria-expanded="false" aria-haspopup="true">
+          <span>Sign In</span>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Floating Nav Sign In Dropdown Popover (Image 1 - Authority First) -->
+  <div class="nav-signin-popover" id="navSigninPopover" role="menu" aria-label="Portal Selection">
+    <div class="popover-header-label">SELECT PORTAL</div>
+
+    <!-- Row 1: Authority Command (First) -->
+    <a href="authority-login.html" class="popover-item popover-authority" onclick="closeNavSigninDropdown()"
+      role="menuitem">
+      <div class="popover-item-icon"><i class="fi fi-rr-building" aria-hidden="true"></i></div>
+      <div class="popover-item-content">
+        <span class="popover-item-title">Authority Command</span>
+        <span class="popover-item-desc">Officer login & GIS risk cockpit</span>
+      </div>
+      <span class="popover-item-arrow">→</span>
+    </a>
+
+    <div class="popover-divider"></div>
+
+    <!-- Row 2: Citizen Portal (Second) -->
+    <button type="button" class="popover-item popover-citizen" onclick="selectNavPortal('citizen')" role="menuitem">
+      <div class="popover-item-icon"><i class="fi fi-rr-user" aria-hidden="true"></i></div>
+      <div class="popover-item-content">
+        <span class="popover-item-title">Citizen Portal</span>
+        <span class="popover-item-desc">GPS hazard check & safe shelters</span>
+      </div>
+      <span class="popover-item-arrow">→</span>
+    </button>
+  </div>
+
+  <!-- ================= 3. CENTERED HERO CONTENT ================= -->
+  <main class="hero-section">
+    <!-- Small Pill Badge Above Title -->
+    <div class="hero-badge">
+      <span class="badge-pulse-dot"></span>
+      <span>Live Disaster Intelligence Platform</span>
+    </div>
+
+    <!-- Main Project Name Heading (Part A: Italic accent word in headline) -->
+    <h1 class="hero-title">
+      <span class="hero-title-red">Risk2</span><span class="hero-title-accent">Rescue</span>
+    </h1>
+
+    <!-- Short One-Line Tagline -->
+    <p class="hero-tagline">
+      Intelligent hazard mapping and relocation planning for vulnerable habitations
+    </p>
+
+    <!-- Single Hero CTA: Get Started (smooth-scrolls to dedicated #portals section) -->
+    <div class="hero-cta-group">
+      <div class="hero-buttons-row">
+        <a href="portal.html" class="hero-cta-btn hero-cta-primary" id="hero-get-started-cta">
+          <span>Get Started</span>
+          <span class="hero-cta-arrow">→</span>
+        </a>
+      </div>
+
+      <!-- Architecture / How It Works Shortcut -->
+      <a href="get-started.html" class="hero-portal-shortcut" id="hero-get-started-btn"
+        title="Learn how Risk2Rescue works">
+        How it works & decision architecture <span>›</span>
+      </a>
+    </div>
+  </main>
+
+  <!-- ================= 4. COLLAPSIBLE DATA-SOURCE CREDIT STRIP ================= -->
+  <footer class="credit-strip-wrapper">
+    <div class="credit-strip-container" id="creditStrip" onclick="toggleCreditStrip(event)">
+      <!-- Default Slim Handle -->
+      <div class="credit-strip-header">
+        <span class="credit-indicator-dot"></span>
+        <span>Powered by live data</span>
+        <span class="credit-chevron">›</span>
+      </div>
+
+      <!-- Expanded Source Drawer -->
+      <div class="credit-strip-content">
+        <div class="credit-strip-intro">
+          <span class="credit-strip-title">Verified Authoritative Data Feeds</span>
+          <span class="credit-strip-badge">● 5 Active Sources</span>
+        </div>
+
+        <div class="credit-sources-grid">
+          <!-- 1. USGS -->
+          <div class="source-card">
+            <div class="source-icon-wrap icon-usgs">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M2 12h4l3-8 4 16 3-8h6" />
+              </svg>
+            </div>
+            <div class="source-info">
+              <span class="source-name">USGS Hazards</span>
+              <span class="source-desc">Earthquake GeoJSON M2.5+</span>
+            </div>
+          </div>
+
+          <!-- 2. IMD -->
+          <div class="source-card">
+            <div class="source-icon-wrap icon-imd">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 3a9 9 0 0 0 9 9" />
+                <path d="M12 7a5 5 0 0 0 5 5" />
+                <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+              </svg>
+            </div>
+            <div class="source-info">
+              <span class="source-name">IMD India</span>
+              <span class="source-desc">Official CAP Warning Feed</span>
+            </div>
+          </div>
+
+          <!-- 3. Open-Meteo -->
+          <div class="source-card">
+            <div class="source-icon-wrap icon-meteo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z" />
+              </svg>
+            </div>
+            <div class="source-info">
+              <span class="source-name">Open-Meteo</span>
+              <span class="source-desc">Weather & Air Quality API</span>
+            </div>
+          </div>
+
+          <!-- 4. Windy.com -->
+          <div class="source-card">
+            <div class="source-icon-wrap icon-windy">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path
+                  d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2" />
+              </svg>
+            </div>
+            <div class="source-info">
+              <span class="source-name">Windy.com</span>
+              <span class="source-desc">Point Forecasts & Radar</span>
+            </div>
+          </div>
+
+          <!-- 5. OpenStreetMap / OSRM -->
+          <div class="source-card">
+            <div class="source-icon-wrap icon-osrm">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="6" cy="19" r="3" />
+                <path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15" />
+                <circle cx="18" cy="5" r="3" />
+              </svg>
+            </div>
+            <div class="source-info">
+              <span class="source-name">OpenStreetMap / OSRM</span>
+              <span class="source-desc">Evacuation Route Engine</span>
+            </div>
+          </div>
+        </div>
+        <div class="credit-strip-attribution" style="font-size: 10px; color: #94a3b8; text-align: center; margin-top: 14px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.08);">
+          Icons: Uicons by <a href="https://www.flaticon.com/uicons" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">Flaticon</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- ================= LOCATION MODAL (TASK 4 FLOW) ================= -->
+  <div id="loc-modal" class="loc-modal-overlay" onclick="handleLocModalBackdrop(event)">
+    <div class="loc-modal-card" onclick="event.stopPropagation()">
+      <!-- Header -->
+      <div class="loc-modal-header">
+        <div class="loc-modal-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+        </div>
+        <div class="loc-modal-meta">
+          <h3>Citizen Portal Setup</h3>
+          <p>Risk2Rescue — Real-Time Hazard Resolver</p>
+        </div>
+        <button type="button" class="loc-modal-close" onclick="closeLocModal()" aria-label="Close modal">×</button>
+      </div>
+
+      <!-- STATE 1: Requesting / Detecting -->
+      <div id="loc-state-detecting" class="loc-state-panel" style="text-align:center; padding: 12px 0 6px;">
+        <div class="loc-pulse-container" aria-hidden="true">
+          <div class="loc-pulse-ring"></div>
+          <div class="loc-pulse-ring"></div>
+          <div class="loc-pulse-ring"></div>
+          <div class="loc-pulse-core">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="2"></circle>
+              <path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"></path>
+              <path d="M7.8 7.8c-2.3 2.3-2.3 6.1 0 8.5"></path>
+              <path d="M19.1 4.9c3.9 3.9 3.9 10.3 0 14.2"></path>
+              <path d="M4.9 4.9c-3.9 3.9-3.9 10.3 0 14.2"></path>
+            </svg>
+          </div>
+        </div>
+        <h4 class="loc-text-primary">Detecting your location...</h4>
+        <p class="loc-text-secondary">This helps us show hazards near you.</p>
+      </div>
+
+      <!-- STATE 2: Success Confirmation (~800ms auto-redirect) -->
+      <div id="loc-state-success" class="loc-state-panel loc-success-wrap" style="display:none;">
+        <div class="loc-check-badge" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <h4 class="loc-text-primary">Location found: <span id="loc-place-name"
+            class="loc-place-highlight">Detecting...</span></h4>
+        <p class="loc-text-secondary">Connecting to live hazard sensors & risk zone feeds...</p>
+        <div>
+          <a href="javascript:void(0)" class="loc-diff-link" onclick="switchToManualSelection()">Use a different
+            location</a>
+        </div>
+      </div>
+
+      <!-- STATE 3: Fallback / Manual District Dropdown -->
+      <div id="loc-state-fallback" class="loc-state-panel loc-fallback-wrap" style="display:none;">
+        <div id="loc-error-msg" class="loc-fallback-alert">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span id="loc-error-text">Location access was unavailable. Please select your district manually.</span>
+        </div>
+        <label for="loc-district-select" class="loc-label">Select your district manually</label>
+        <select id="loc-district-select" class="loc-select">
+          <option value="">— Choose your Andhra Pradesh District —</option>
+        </select>
+        <button type="button" class="loc-continue-btn" onclick="useManualLocation()">
+          <span>Continue</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
+        <button type="button" class="loc-retry-btn" onclick="retryGeolocation()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
+          <span>Retry GPS detection</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shared Scripts for Location & Sign-In Modal -->
+  <script src="js/location-service.js"></script>
+  <script src="js/signin-modal.js"></script>
+
+  <!-- Landing Page Interactive Script -->
+  <script>
+    // 1. Reduced Motion Detection & Fallback Handling
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const bgVideo = document.getElementById('bg-video');
+    if (prefersReducedMotion && bgVideo) {
+      bgVideo.pause();
+      bgVideo.style.display = 'none';
+    }
+
+    // Ensure video keeps playing smoothly if stalled or tab switched
+    if (bgVideo && !prefersReducedMotion) {
+      bgVideo.play().catch(() => { });
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && bgVideo.paused) {
+          bgVideo.play().catch(() => { });
+        }
+      });
+    }
+
+    // 2. Nav "Sign In" Anchored Dropdown Controller (Image 1)
+    const navSigninPopover = document.getElementById('navSigninPopover');
+    const navSigninBtn = document.getElementById('nav-signin-btn');
+
+    function toggleNavSigninDropdown(e) {
+      if (e && e.stopPropagation) e.stopPropagation();
+      if (!navSigninPopover) return;
+      const isOpen = navSigninPopover.classList.contains('is-open');
+      if (isOpen) {
+        closeNavSigninDropdown();
+      } else {
+        openNavSigninDropdown();
+      }
+    }
+
+    function openNavSigninDropdown() {
+      if (!navSigninPopover || !navSigninBtn) return;
+      const rect = navSigninBtn.getBoundingClientRect();
+      const popoverWidth = 290;
+
+      navSigninPopover.style.position = 'fixed';
+      navSigninPopover.style.top = (rect.bottom + 10) + 'px';
+
+      // Right-aligned directly under the Nav Sign In button
+      let targetLeft = rect.right - popoverWidth;
+      targetLeft = Math.max(12, Math.min(window.innerWidth - popoverWidth - 12, targetLeft));
+      navSigninPopover.style.left = targetLeft + 'px';
+      navSigninPopover.style.right = 'auto';
+
+      navSigninPopover.classList.add('is-open');
+      navSigninBtn.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeNavSigninDropdown() {
+      if (!navSigninPopover) return;
+      navSigninPopover.classList.remove('is-open');
+      if (navSigninBtn) navSigninBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    // Alias for backward compatibility if called elsewhere
+    window.closeNavSigninPopover = closeNavSigninDropdown;
+    window.openNavSigninPopover = openNavSigninDropdown;
+    window.toggleNavSigninPopover = toggleNavSigninDropdown;
+
+    function selectNavPortal(portal) {
+      closeNavSigninDropdown();
+      if (portal === 'citizen') {
+        if (typeof enterAsCitizen === 'function') {
+          enterAsCitizen();
+        }
+      } else if (portal === 'authority') {
+        window.location.href = 'authority-login.html';
+      }
+    }
+
+    // 3. Hero "Get Started" Navigation Controller (opens dedicated portal.html)
+    function openPortalWindow(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      closeNavSigninDropdown();
+      window.location.href = 'portal.html';
+    }
+    window.scrollToPortals = openPortalWindow;
+
+    // 4. Dismiss Dropdown on Outside Click or Escape
+    document.addEventListener('click', (e) => {
+      const inPopover = navSigninPopover && navSigninPopover.contains(e.target);
+      const inNavBtn = navSigninBtn && navSigninBtn.contains(e.target);
+
+      if (navSigninPopover && navSigninPopover.classList.contains('is-open') && !inPopover && !inNavBtn) {
+        closeNavSigninDropdown();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && navSigninPopover) {
+        closeNavSigninDropdown();
+      }
+    });
+
+    function updateNavDropdownPositionIfOpen() {
+      if (navSigninPopover && navSigninPopover.classList.contains('is-open')) {
+        openNavSigninDropdown();
+      }
+    }
+
+    window.addEventListener('resize', updateNavDropdownPositionIfOpen);
+    window.addEventListener('scroll', updateNavDropdownPositionIfOpen, { passive: true });
+
+
+    // 3. Collapsible Data-Source Credit Strip Interaction
+    const creditStrip = document.getElementById('creditStrip');
+    function toggleCreditStrip(e) {
+      if (window.innerWidth <= 768 || e.type === 'click') {
+        creditStrip.classList.toggle('is-expanded');
+      }
+    }
+
+    document.addEventListener('click', (e) => {
+      if (creditStrip && !creditStrip.contains(e.target)) {
+        creditStrip.classList.remove('is-expanded');
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && creditStrip) {
+        creditStrip.classList.remove('is-expanded');
+      }
+    });
+
+    // 4. Test helper for popover verification
+    if (new URLSearchParams(window.location.search).get('popover') === '1') {
+      setTimeout(openNavSigninPopover, 100);
+    }
+  </script>
+</body>
+
+</html>

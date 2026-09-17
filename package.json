@@ -1,0 +1,31 @@
+{
+  "name": "risk2rescue",
+  "version": "2.0.0",
+  "description": "Risk2Rescue — AI-Powered Disaster Management, Multi-Hazard GIS Intelligence, and Authority Incident Command System",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "serve": "node server.js",
+    "test": "node server.js --check"
+  },
+  "keywords": [
+    "disaster-management",
+    "gis-mapping",
+    "leaflet",
+    "hazard-intelligence",
+    "early-warning",
+    "emergency-response",
+    "ndrf",
+    "teja-command-center"
+  ],
+  "author": "Teja",
+  "license": "MIT",
+  "devDependencies": {
+    "ws": "^8.21.3"
+  },
+  "dependencies": {
+    "@flaticon/flaticon-uicons": "^3.3.1"
+  }
+}
